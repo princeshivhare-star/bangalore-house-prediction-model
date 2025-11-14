@@ -14,9 +14,15 @@ CORS(app)
 # -----------------------------
 # Paths to model and columns
 # -----------------------------
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+import os
+
+# Base directory of your project (where app.py is located)
+BASE_DIR = '/Users/nikhilshivhare/Desktop/bangalore house prediction model'
+
+# Paths to model and columns files
 MODEL_PATH = os.path.join(BASE_DIR, "model", "banglore_home_prices_model.pickle")
 COLUMNS_PATH = os.path.join(BASE_DIR, "model", "columns.json")
+
 
 # -----------------------------
 # Load Model
