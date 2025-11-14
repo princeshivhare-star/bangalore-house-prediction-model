@@ -9,14 +9,19 @@ app = Flask(__name__)
 CORS(app)
 
 # -----------------------------------------------------
-# Load model & columns using relative paths (important)
+# Correct Paths (Render + Local)
 # -----------------------------------------------------
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))   # /server
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))   # /root
+MODEL_DIR = os.path.join(BASE_DIR, "model")
 
-MODEL_PATH = os.path.join(BASE_DIR, "..", "model", "banglore_home_prices_model.pickle")
-COLUMNS_PATH = os.path.join(BASE_DIR, "..", "model", "columns.json")
+MODEL_PATH = os.path.join(MODEL_DIR, "banglore_home_prices_model.pickle")
+COLUMNS_PATH = os.path.join(MODEL_DIR, "columns.json")
 
 print("🚀 Loading model & columns...")
+
+# Load model
+model = None
+data_columns = []
 
 try:
     with open(MODEL_PATH, "rb") as f:
@@ -25,6 +30,7 @@ try:
 except Exception as e:
     print("❌ Error loading model:", e)
 
+# Load columns
 try:
     with open(COLUMNS_PATH, "r") as f:
         data_columns = json.load(f)["data_columns"]
@@ -32,16 +38,16 @@ try:
 except Exception as e:
     print("❌ Error loading columns:", e)
 
-# Extract location names
-locations = data_columns[3:] if len(data_columns) > 3 else []
+# Extract locations safely
+locations = data_columns[3:] if data_columns else []
 
 
 # -----------------------------------------------------
-# Serve Frontend HTML
+# Frontend HTML
 # -----------------------------------------------------
 @app.route("/")
 def home():
-    return render_template("app.html")   # templates/app.html
+    return render_template("app.html")
 
 
 # -----------------------------------------------------
@@ -78,8 +84,7 @@ def predict_home_price():
 
 
 # -----------------------------------------------------
-# Run Flask App on Render
+# Run Flask App
 # -----------------------------------------------------
 if __name__ == "__main__":
-    print("🚀 Starting Flask server...")
     app.run(host="0.0.0.0", port=5000)
