@@ -18,16 +18,20 @@ function getBHKValue() {
   return -1;
 }
 
+// ✅ Automatically detect correct backend URL (local or Render)
+const baseUrl = window.location.origin;
+
 function onClickedEstimatePrice() {
   console.log("Estimate price button clicked");
+
   var sqft = document.getElementById("uiSqft");
   var bhk = getBHKValue();
   var bathrooms = getBathValue();
   var location = document.getElementById("uiLocations");
   var estPrice = document.getElementById("uiEstimatedPrice");
 
-  // ✅ Use local Flask endpoint for testing
-  var url = "http://127.0.0.1:5000/predict_home_price";
+  // ❗ Correct backend URL
+  var url = `${baseUrl}/predict_home_price`;
 
   $.post(
     url,
@@ -52,27 +56,28 @@ function onClickedEstimatePrice() {
 function onPageLoad() {
   console.log("document loaded");
 
-  // ✅ Use local Flask endpoint for testing
-  var url = "http://127.0.0.1:5000/get_location_names";
+  // ❗ Correct backend URL
+  var url = `${baseUrl}/get_location_names`;
 
   $.get(url, function (data, status) {
-    console.log("Got response for get_location_names request");
+    console.log("Got response for get_location_names");
+
     if (data && data.locations) {
       var uiLocations = document.getElementById("uiLocations");
+
       $("#uiLocations").empty();
       $("#uiLocations").append(
         new Option("Choose a Location", "", true, true)
       );
+
       for (var i = 0; i < data.locations.length; i++) {
         var opt = new Option(data.locations[i]);
         $("#uiLocations").append(opt);
       }
     }
   }).fail(function () {
-    console.error("❌ Failed to load locations. Is backend running?");
+    console.error("❌ Failed to load locations. Backend not reachable.");
   });
 }
 
 window.onload = onPageLoad;
-
-
