@@ -1,3 +1,6 @@
+// 🔥 Use Render backend URL
+const backend = "https://bangalore-house-prediction-model.onrender.com";
+
 function getBathValue() {
   var uiBathrooms = document.getElementsByName("uiBathrooms");
   for (var i = 0; i < uiBathrooms.length; i++) {
@@ -18,65 +21,43 @@ function getBHKValue() {
   return -1;
 }
 
-// ✅ Automatically detect correct backend URL (local or Render)
-const baseUrl = window.location.origin;
-
 function onClickedEstimatePrice() {
-  console.log("Estimate price button clicked");
-
   var sqft = document.getElementById("uiSqft");
   var bhk = getBHKValue();
-  var bathrooms = getBathValue();
+  var bath = getBathValue();
   var location = document.getElementById("uiLocations");
   var estPrice = document.getElementById("uiEstimatedPrice");
 
-  // ❗ Correct backend URL
-  var url = `${baseUrl}/predict_home_price`;
-
   $.post(
-    url,
+    backend + "/predict_home_price",
     {
       total_sqft: parseFloat(sqft.value),
       bhk: bhk,
-      bath: bathrooms,
+      bath: bath,
       location: location.value,
     },
-    function (data, status) {
-      console.log(data);
-      estPrice.innerHTML =
-        "<h2>" + data.estimated_price.toString() + " Lakh</h2>";
-      console.log(status);
+    function (data) {
+      estPrice.innerHTML = "<h2>" + data.estimated_price + " Lakh</h2>";
     }
   ).fail(function () {
-    estPrice.innerHTML =
-      "<h2>Error fetching price. Check backend connection.</h2>";
+    estPrice.innerHTML = "<h2>Error contacting backend</h2>";
   });
 }
 
 function onPageLoad() {
-  console.log("document loaded");
+  console.log("Loading locations...");
 
-  // ❗ Correct backend URL
-  var url = `${baseUrl}/get_location_names`;
-
-  $.get(url, function (data, status) {
-    console.log("Got response for get_location_names");
-
+  $.get(backend + "/get_location_names", function (data) {
     if (data && data.locations) {
-      var uiLocations = document.getElementById("uiLocations");
-
       $("#uiLocations").empty();
-      $("#uiLocations").append(
-        new Option("Choose a Location", "", true, true)
-      );
+      $("#uiLocations").append(new Option("Choose a Location", "", true, true));
 
-      for (var i = 0; i < data.locations.length; i++) {
-        var opt = new Option(data.locations[i]);
-        $("#uiLocations").append(opt);
-      }
+      data.locations.forEach(loc => {
+        $("#uiLocations").append(new Option(loc));
+      });
     }
   }).fail(function () {
-    console.error("❌ Failed to load locations. Backend not reachable.");
+    console.error("❌ Failed to load locations");
   });
 }
 
